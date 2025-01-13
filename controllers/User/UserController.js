@@ -140,6 +140,7 @@ const Login = async (req, res) => {
         const token = await CreateAccessToken(userCheck._id, res);
         const indiaTime = moment().tz("Asia/Kolkata").format();
         userCheck.lastLogin = indiaTime;
+        userCheck.token = token;
         await userCheck.save();
         res.cookie('authToken', token, {
             httpOnly: true,
