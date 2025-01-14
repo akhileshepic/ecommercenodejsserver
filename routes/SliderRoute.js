@@ -9,4 +9,4 @@ Router.post('/', multipleImage('HomeSlider'), authenticateJWT, CreatFun);
 Router.get('/', authenticateJWT, getAll)
 Router.delete('/:id', authenticateJWT, imageDelete)
 
-export default Router
+export default Router 
