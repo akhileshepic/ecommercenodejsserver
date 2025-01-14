@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import connectToDatabase from "./config/Databaseconfig.js";
 import userRoute from "./routes/userRoute.js";
 import SliderRoute from "./routes/SliderRoute.js";
+import CategoryRoute from "./routes/CategoryRoute.js";
 import cors from "cors";
 import path from 'path';
 dotenv.config(); // Load environment variables from .env file
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
 
 app.use('/api/user', userRoute);
 app.use('/api/slider', SliderRoute);
+app.use('/api/category', CategoryRoute);
 
 // Connect to the database and start the server
 connectToDatabase()

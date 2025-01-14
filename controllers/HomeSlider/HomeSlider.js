@@ -63,6 +63,28 @@ const getAll = async (req, res) => {
     }
 }
 
+const SingleData = async (req, res) => {
+    try {
+        const image = await HomeSliderModel.findById(req.params.id)
+        if (!image) {
+            return res.status(404).json({
+                success: false,
+                message: "Image not found"
+            });
+        }
+        res.status(200).json({
+            success: true,
+            message: "image ",
+            data: image
+        })
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: "Error hashing password",
+            error: error.message || error
+        })
+    }
+}
 const imageDelete = async (req, res) => {
     try {
         const imagedelete = await HomeSliderModel.findByIdAndDelete(req.params.id)
@@ -94,4 +116,4 @@ const imageDelete = async (req, res) => {
     }
 }
 
-export { CreatFun, getAll, imageDelete }
+export { CreatFun, getAll, imageDelete, SingleData }
