@@ -1,12 +1,14 @@
 
 import UserModel from "../../models/UserModel.js";
 import { comparePassword, createPassword } from "../../helpers/Hashfunction.js";
-import { CreateAccessToken } from "../../helpers/Webtoken.js";
+import { CreateAccessToken, CreateRefreshToken } from "../../helpers/Webtoken.js";
 import fs from 'fs';
 import path from 'path';
 import moment from 'moment-timezone';
 import redis from "redis";
 const redisClient = redis.createClient();
+import jwt from "jsonwebtoken";
+import dotenv from 'dotenv';
 const CreateUser = async (req, res) => {
     try {
 
@@ -137,27 +139,28 @@ const Login = async (req, res) => {
         }
 
 
-        const token = await CreateAccessToken(userCheck._id, res);
+        const accessToken = await CreateAccessToken(userCheck._id, res);
+        const refreshToken = await CreateRefreshToken(userCheck._id)
+
         const indiaTime = moment().tz("Asia/Kolkata").format();
         userCheck.lastLogin = indiaTime;
-        userCheck.token = token;
+        userCheck.token = accessToken;
         await userCheck.save();
-        res.cookie('authToken', token, {
+        const cookiesOption = {
             httpOnly: true,
-            secure: 'production',
-            maxAge: 3600000, // 1 hour
-            sameSite: 'strict',
-        });
+            secure: true,
+            sameSite: "None"
+        }
+        res.cookie('accessToken', accessToken, cookiesOption)
+        res.cookie('refreshToken', refreshToken, cookiesOption)
         return res.status(200).json({
+            message: "Login successfully",
+            error: false,
             success: true,
-            message: "Login successful",
             data: {
-                name: userCheck.name,
-                email: userCheck.email,
-                phone: userCheck.phone,
-                lastLogin: userCheck.lastLogin,
-            },
-            token,
+                accessToken,
+                refreshToken
+            }
         });
     } catch (error) {
 
@@ -186,4 +189,59 @@ const Logout = async (req, res) => {
         });
     }
 }
-export { CreateUser, ProfileImageUpload, Login, Logout }
+
+
+const refreshToken = async (request, response) => {
+    try {
+        const refreshToken = request.cookies.refreshToken || request?.headers?.authorization?.split(" ")[1]  /// [ Bearer token]
+        console.log(refreshToken)
+        if (!refreshToken) {
+            return response.status(401).json({
+                message: "Invalid token",
+                error: true,
+                success: false
+            })
+        }
+
+        const verifyToken = jwt.verify(refreshToken, process.env.JWT_SECRET)
+
+        if (!verifyToken) {
+            return response.status(401).json({
+                message: "token is expired",
+                error: true,
+                success: false
+            })
+        }
+
+        const userId = verifyToken?.id
+
+        const newAccessToken = await CreateAccessToken(userId)
+
+        const cookiesOption = {
+            httpOnly: true,
+            secure: true,
+            sameSite: "None"
+        }
+
+        response.cookie('accessToken', newAccessToken, cookiesOption)
+
+        return response.json({
+            message: "New Access token generated",
+            error: false,
+            success: true,
+            data: {
+                accessToken: newAccessToken
+            }
+        })
+
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        })
+    }
+}
+
+export { CreateUser, ProfileImageUpload, Login, Logout, refreshToken }

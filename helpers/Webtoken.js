@@ -21,8 +21,8 @@ const CreateAccessToken = async (id, res) => {
 const CreateRefreshToken = async (id) => {
     try {
         // Refresh token will typically have a longer expiry time (e.g., 7 days)
-        const refreshToken = jsonwebtoken.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-        return { success: true, refreshToken };  // Return the refresh token
+        return jsonwebtoken.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
     } catch (error) {
         console.error("Error generating refresh token:", error);
         return { success: false, message: "Failed to create refresh token", error: error.message || error };

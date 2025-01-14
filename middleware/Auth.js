@@ -12,24 +12,30 @@ const authenticateJWT = (req, res, next) => {
 
 
     if (!token) {
-        return res.status(403).json({ message: 'Access denied. No token provided.' });
+        return res.status(401).json({ message: 'Access denied. No token provided.' });
     }
 
     try {
-        // Verify the token using the secret from the environment variable 
-        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-            if (err) {
-                return res.status(403).json({ message: 'Invalid or expired token.' });
-            }
+        // Verify the token using the secret from the environment variable
+        const decode = jwt.verify(token, process.env.JWT_SECRET)
+        if (!decode) {
+            return res.status(401).json({
+                message: "unauthorized access",
+                error: true,
+                success: false
+            })
+        }
 
-            // Attach the user information to the request object
-            req.user = user.id;
-            //console.log(user.id)
-            // Proceed to the next middleware or route handler
-            next();
-        });
+        req.user = decode.id;
+
+        next();
+
     } catch (err) {
-        return res.status(500).json({ error: err.message.message });
+        return res.status(500).json({
+            message: "You have not login",///error.message || error,
+            error: true,
+            success: false
+        })
     }
 };
 
