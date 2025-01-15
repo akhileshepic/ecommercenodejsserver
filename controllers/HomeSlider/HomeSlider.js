@@ -116,4 +116,49 @@ const imageDelete = async (req, res) => {
     }
 }
 
-export { CreatFun, getAll, imageDelete, SingleData }
+const updateSlider = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "No files uploaded.",
+            });
+        }
+
+        const uploadedFile = req.files[0];
+        const slider = await HomeSliderModel.findById(id);
+
+        if (!slider) {
+            return res.status(404).json({
+                success: false,
+                message: "Slider not found.",
+            });
+        }
+
+        // Delete the old file if it exists
+        const oldImagePath = path.join(process.cwd(), slider.image);
+        if (fs.existsSync(oldImagePath)) {
+            fs.unlinkSync(oldImagePath);
+        }
+
+        // Update the slider
+        slider.image = uploadedFile.path;
+        await slider.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Slider updated successfully.",
+            data: slider,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error updating slider.",
+            error: error.message || error,
+        });
+    }
+};
+
+export { CreatFun, getAll, imageDelete, SingleData, updateSlider }
