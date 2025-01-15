@@ -256,4 +256,24 @@ const refreshToken = async (request, response) => {
     }
 }
 
-export { CreateUser, ProfileImageUpload, Login, Logout, refreshToken }
+const userProfile = async (request, response) => {
+    try {
+        const UserProfile = await UserModel.findById(request.user, '-password -token');
+        return response.json({
+            message: "UserProfile",
+            error: false,
+            success: true,
+            data: {
+                UserProfile
+            }
+        })
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        })
+    }
+}
+
+export { CreateUser, ProfileImageUpload, Login, Logout, refreshToken, userProfile }
