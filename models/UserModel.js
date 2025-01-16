@@ -37,6 +37,29 @@ const UserSchema = new mongoose.Schema({
     profileImage: {
         type: String,
     },
+    status: {
+        type: String,
+        enum: ["Active", "Inactive", "Suspended"],
+        default: "Active"
+    },
+    address_details: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: 'address'
+        }
+    ],
+    shopping_cart: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: 'cartProduct'
+        }
+    ],
+    orderHistory: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: 'order'
+        }
+    ],
     createdAt: {
         type: Date,
         default: Date.now, // Automatically sets the current date and time

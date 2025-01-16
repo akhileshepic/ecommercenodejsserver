@@ -1,5 +1,5 @@
 
-AddCategoryController
+
 import express from "express";
 import { multipleImage, UploadFile } from "../helpers/UploadFile.js";
 import authenticateJWT from "../middleware/Auth.js";
